@@ -1,5 +1,6 @@
 package org.akshata.MessagesAPI.resources;
 
+import java.net.URI;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
@@ -11,7 +12,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 import org.akshata.MessagesAPI.model.Message;
 import org.akshata.MessagesAPI.service.MessageService;
@@ -40,11 +44,20 @@ public class MessageResource {
 	public Message getMessage(@PathParam("messageID") long messageID){
 		return service.getMessage(messageID);
 	}
-
+	
+	//Adding a header with location URI and adding a status code of 201 after Message creation
 	@POST
-	public Message addMessage(Message message){
-		return service.addMessage(message);
+	public Response addMessage(Message message, @Context UriInfo uriInfo) {	
+		Message newMessage = service.addMessage(message);
+		String newId = String.valueOf(newMessage.getId());
+		URI uri = uriInfo.getAbsolutePathBuilder().path(newId).build();
+		return Response.created(uri).entity(newMessage).build();
 	}
+
+//	@POST
+//	public Message addMessage(Message message){
+//		return service.addMessage(message);
+//	}
 	
 	@PUT
 	@Path("/{messageID}")
@@ -58,4 +71,5 @@ public class MessageResource {
 	public void deleteMessage(@PathParam("messageID") long messageID, Message message){
 		service.removeMessage(messageID);
 	}
+	
 }
